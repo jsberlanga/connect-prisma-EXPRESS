@@ -1,0 +1,24 @@
+html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Poppins";
+  background: #eeeeee;
+  color: rgb(88, 47, 64);
+}
+
+.container {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.nav {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nav a {
+  margin: 1rem 3rem;
+}

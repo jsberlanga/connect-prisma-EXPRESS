@@ -1,0 +1,11 @@
+extend layout.pug
+
+block content
+  h1 Welcome #{user}
+  h2= title
+  ul
+    each val, index in results
+      - var img = imageBaseUrl + val.poster_path
+        img(src=img, alt="poster" width="240")
+      li(style={"font-weight": 600, "list-style": "none"})= index + 1 + ". " +  val.title
+        p(style={"font-weight": 300})= val.overview
