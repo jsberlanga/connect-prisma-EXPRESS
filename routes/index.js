@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const { prisma } = require("../generated/prisma-client");
 
 const request = require("request");
@@ -14,7 +15,7 @@ router.use((req, res, next) => {
 });
 
 router.get("/", (req, res, next) => {
-  if (!req.cookies.username) {
+  if (!req.cookies.name) {
     res.redirect("/login");
   } else {
     const nowPlayingUrl = `${moviedbUrl}now_playing${apiKey}`;
@@ -23,14 +24,14 @@ router.get("/", (req, res, next) => {
       res.render("index", {
         results: parsedResults.results.slice(0, 10),
         title: "Now Playing in Cinemas",
-        user: req.cookies.username
+        user: req.cookies.name
       });
     });
   }
 });
 
 router.get("/login", (req, res, next) => {
-  if (!req.cookies.username) {
+  if (!req.cookies.name) {
     res.render("login");
   } else {
     res.render("login", {
@@ -40,34 +41,47 @@ router.get("/login", (req, res, next) => {
 });
 
 router.post("/process_login", async (req, res, next) => {
-  const { username } = req.body;
-  const user = await prisma.users({ where: { name: username } });
-  if (user.length) {
-    res.cookie("username", username);
-    res.redirect("/");
+  const { name, password } = req.body;
+
+  const user = await prisma.user({ name });
+  if (!user) {
+    res.render("login", {
+      loginError: "Ops! This user was not found."
+    });
+  }
+
+  const passwordMatch = bcrypt.compareSync(password, user.password);
+
+  if (!passwordMatch) {
+    res.render("login", {
+      loginError: "Ops! This combination user/password is incorrect."
+    });
   } else {
-    res.render("login", { userNotFound: "Ops! This user was not found." });
+    res.cookie("name", name);
+    res.redirect("/");
   }
 });
 
 router.post("/process_register", async (req, res, next) => {
-  const { username } = req.body;
-  const user = await prisma.users({ where: { name: username } });
-  console.log(user);
-  if (user.length) {
+  const { name, password } = req.body;
+
+  const hash = bcrypt.hashSync(password, 10);
+
+  const user = await prisma.user({ name });
+  if (user) {
     res.render("login", {
       userFound: "Ops! This user is already registered."
     });
   } else {
-    const newUser = await prisma.createUser({ name: username });
+    const newUser = await prisma.createUser({ name, password: hash });
 
-    res.cookie("username", username);
+    res.cookie("name", name);
     res.redirect("/");
   }
 });
 
 router.get("/logout", (req, res, next) => {
-  res.clearCookie("username");
+  res.clearCookie("name");
   res.redirect("/");
 });
 

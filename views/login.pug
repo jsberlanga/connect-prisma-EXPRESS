@@ -7,14 +7,18 @@ block content
     h2 Login with your username
     form(action="/process_login", method="post")
       label(for='name') Username:
-        input#username(type="text", name="username")
+        input#name(type="text", name="name")
+      label(for='password') Password:
+        input#password(type="password", name="password")
       input(type="submit", value="login")
-    if userNotFound
-      p(style={color: "red"})= userNotFound
+    if loginError
+      p(style={color: "red"})= loginError
     h2 Don't have an account yet?
     form(action="/process_register", method="post")
       label(for='name') Username:
-        input#username(type="text", name="username")
+        input#name(type="text", name="name")
+      label(for='password') Password:
+        input#password(type="password", name="password")
       input(type="submit", value="register")
-    if  userFound
+    if userFound
       p(style={color: "red"})= userFound
