@@ -27,10 +27,15 @@ router.use((req, res, next) => {
   next();
 });
 
+const fragment = `fragment UserWithoutPassword on User {
+  id
+  name
+}
+`;
+
 router.use(async (req, res, next) => {
   if (req.userId) {
-    const user = await prisma.user({ id: req.userId });
-    delete user.password;
+    const user = await prisma.user({ id: req.userId }).$fragment(fragment);
     req.user = user;
   }
   next();
