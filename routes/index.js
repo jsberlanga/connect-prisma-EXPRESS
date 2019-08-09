@@ -48,8 +48,13 @@ router.get("/", (req, res, next) => {
     const nowPlayingUrl = `${moviedbUrl}now_playing${apiKey}`;
     request.get(nowPlayingUrl, (error, response, body) => {
       const parsedResults = JSON.parse(body);
+      const filteredResults = parsedResults.results.map(
+        ({ id, title, poster_path, overview }) => {
+          return { id, title, poster_path, overview };
+        }
+      );
       res.render("index", {
-        results: parsedResults.results.slice(0, 10),
+        results: filteredResults.slice(0, 10),
         title: "Now Playing in Cinemas",
         user: req.user.name
       });
@@ -89,7 +94,7 @@ router.post("/process_login", async (req, res, next) => {
       expiresIn: expiresIn
     });
 
-    res.cookie("token", accessToken);
+    res.cookie("token", accessToken, { httpOnly: true });
     res.redirect("/");
   }
 });
@@ -112,7 +117,7 @@ router.post("/process_register", async (req, res, next) => {
       expiresIn: expiresIn
     });
 
-    res.cookie("token", accessToken);
+    res.cookie("token", accessToken, { httpOnly: true });
     res.redirect("/");
   }
 });
